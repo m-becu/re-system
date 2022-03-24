@@ -10,6 +10,9 @@
     La page doit également permettre à un administrateur du site de se connecter, et d'accèder aux formulaires CRUD pour les produits. 
 */
 
+require_once("./functions.php"); // On récupère les fonctions de notre fichier.
+$connexion = connexion_bdd(); // Puis on récupère la connexion à la base.
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -26,6 +29,11 @@
         <title>Accueil</title>
     </head>
     <body>
-        
+        <!-- Ce code affichera en gras le mot "Connectée" si la connexion à la base est réussie. -->
+        <p>Etat de la base: <b>
+            <?php 
+                if ($connexion) echo("Connectée");
+            ?>
+        </b></p>
     </body>
 </html>
