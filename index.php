@@ -4,14 +4,38 @@
     - Consulter les produits du site même en mode invité (non-connecté)
     * Cliquer sur un lien d'inscription
     * Cliquer sur un lien de connexion
-    - Si connecté, de cliquer sur un lien de déconnexion
+    * Si connecté, de cliquer sur un lien de déconnexion
     - Si connecté, de consulter ses recommandations
 
     La page doit également permettre à un administrateur du site de se connecter, et d'accèder aux formulaires CRUD pour les produits. 
 */
 session_start();
 require_once("./functions.php"); // On récupère les fonctions de notre fichier.
+
 $connexion = connexion_bdd(); // Puis on récupère la connexion à la base.
+$sql = $connexion->query("SELECT * FROM `songs`");
+
+// Gestion des erreurs
+if (isset($_GET["error"])) {
+    switch ($_GET['error']) {
+        case 'form_type':
+            $error = "Typage formulaire invalide.";
+            break;
+
+        case 'image_ext':
+            $error = "Extension de fichier invalide.\nImage non sauvée.";
+            break;
+        
+        default:
+            $error = $_GET['error'];
+            break;
+    }
+    ?>
+    <span id="errors">
+        <p>Une erreur est survenue : <?=$error?></p>
+    </span>
+    <?php
+}
 
 // On regarde si une action à été entreprise
 if (isset($_GET["action"])) {
@@ -75,6 +99,12 @@ if (isset($_GET["action"])) {
             } catch (Exception $e) {
                 die('Erreur : '.$e->getMessage());
             }
+            break;
+        
+        case 'logout':
+            session_destroy();
+            $_SESSION = array();
+            break;
         
         default:
             # code...
@@ -127,12 +157,57 @@ if (isset($_GET["action"])) {
             }
             ?>
         </fieldset>
-        <p>Etat de la connexion: <b>
+        <!-- Simple code pour afficher que tout vas bien avec la BDD -->
+        <p>Etat de la connexion serveur: <b>
             <?php 
-                if (isset($_SESSION['id'])) echo("Client");
-                else if ($connexion) echo("BDD");
+                if ($connexion) echo("OK");
                 else echo("Erreur");
             ?>
         </b></p>
+        <?php
+            // Tout le code présent dans cette condition n'est exécuté qu'en présence d'une connexion client.
+            // Ainsi, c'est ici que nous afficheront les recommandations personnalisées.
+            if (isset($_SESSION["id"])) {
+                // On réalise une deuxième condition qui affichera également les outils d'administration
+                if (isset($_SESSION["admin"]) && $_SESSION["admin"] === 1) {
+                    // Dans ces conditions, le client connecté est un administrateur du site
+                    ?>
+                    <h2>Bienvenue <?=$_SESSION["login"]?>!</h2>
+                    <a href="/admin">Page d'administration</a><br>
+                    <a href="?action=logout">Déconnexion</a> 
+                    <?php
+                } else {
+                    ?>
+                    <!-- La syntaxe utilisée pour ci-dessous permet de rapidement 'echo' une variable PHP -->
+                    <h2>Bonjour <?=$_SESSION["login"]?>!</h2>
+                    <p>Vous êtes connecté au système de recommandations!</p>
+                    <a href="?action=logout">Déconnexion</a> 
+                    <?php 
+                }
+            }
+
+        ?>
+        <div class="songs">
+            <ul> <?php
+                while ($songs = $sql->fetch()) {
+
+                    $id = $songs['id'];
+                    $title = $songs['title'];
+                    $artist = $songs['artist'];
+                    $album = $songs['album'];
+                    $genre = $songs['genre'];
+                    ?>
+
+                    <li>
+                        <a href="/songs/<?=$id?>">
+                            <h3><?=$title?></h3>
+                            <h4><?=$artist?></h4>
+                            <img src="../<?=$album?>" alt="pochette">
+                        </a>
+                    </li>
+
+                <?php } ?>
+            </ul>
+        </div>
     </body>
 </html>
