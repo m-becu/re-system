@@ -49,5 +49,8 @@ Nous ajoutons également la table des produits (products). Comme nous avons choi
 Pour se connecter à la base de donnée, nous allons programmer une fonction qui sera très souvent réutilisée. L'idéal serait donc d'écrire notre fonction dans un fichier spécifique, que l'on pourrait appeler n'importe où sur notre site.
 
 Pour se faire nous allons créer un fichier `functions.php`. Plus tard nous y ajouterons toutes les autres fonctions susceptibles d'être réutilisées un peu partout.
+<<<<<<< HEAD
 
 Une fois la fonction de connexion écrite, nous pouvons l'appeler en ajoutant les fonctions depuis n'importe qu'elle autre page de notre site.
+=======
+>>>>>>> 93154e1ddd89739afc386f2a45fef4ec52abe1a4
