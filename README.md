@@ -63,3 +63,18 @@ Pour vérifier la connexion client, on va d'abord rechercher si son nom d'utilis
 Pour l'inscription c'est plus ou moins la même chose, on va utiliser l'action 'register' cette fois-ci, on va récupérer cette action sur la page d'accueil et ajouter l'utilisateur dans la base. La différence est que cette fois-ci on doit vérifier que l'utilisateur n'est pas déjà dans la base, et connecter automatiquement celui qui réussi à s'inscrire.
 
 Pour le moment le seul moyen de créer un compte administrateur est en venant modifier le contenu de la base de donnée directement, en changeant la valeur de la colonne 'admin' par 1. Nous créons quelques utilisateurs pour nos tests : Pierre (admin), Paul & Jacques.
+
+### Ajout de produits
+
+En tant qu'administrateur connecté, le client peut ajouter de nouvelles chansons dans la base. On utilise le même principe que pour l'inscription client et le même gestionnaire d'action de la page d'accueil. Pour faciliter la navigation nous allons également ajouter une barre de liens en haut de chaque page. Afin d'éviter de taper plusieurs fois le même code, nous utiliseront un composant à part qu'on importera dans toutes les pages.
+
+### Navigation
+
+La barre de navigation contiendra les données suivantes:
+
+- Formulaire de connexion
+- Formulaire d'inscription
+- Outils d'administration
+- Liens de navigation
+- Etat de la connexion
+- Bouton de déconnexion

@@ -52,30 +52,36 @@ if (isset($_GET["action"])) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/global.css">
     <title>Administration</title>
 </head>
 <body>
-    <h2>Page d'administration</h2>
-    <fieldset>
-        <legend>Formulaire d'ajout d'un morceau</legend>
-        <form action="?action=add" method="post" enctype="multipart/form-data">
-            <label for="ititle">Titre</label>
-            <input type="text" name="title" id="ititle">
-            <label for="iartist">Artiste</label>
-            <input type="text" name="artist" id="iartist">
-            <label for="ialbum">Pochette de l'album</label>
-            <input type="file" name="album" id="ialbum">
-            <label for="igenre">Genre</label>
-            <select name="genre" id="igenre">
-                <option value="null">Sélectionnez un genre</option>
-                <option value="rock">Rock</option>
-                <option value="pop">Pop</option>
-                <option value="funk">Funk</option>
-                <option value="electro">Electro</option>
-                <option value="disco">Disco</option>
-            </select>
-            <input type="submit" value="Envoyer">
-        </form>
-    </fieldset>
+    <?php include_once("../components/navigation.php") ?>
+    <div class="main">
+        <h2>Page d'administration</h2>
+        <fieldset>
+            <legend>Formulaire d'ajout d'un morceau</legend>
+            <form action="?action=add" method="post" enctype="multipart/form-data">
+                <span>
+                    <label for="ititle">Titre</label>
+                    <input type="text" name="title" id="ititle">
+                    <label for="iartist">Artiste</label>
+                    <input type="text" name="artist" id="iartist">
+                </span>
+                <label for="ialbum">Pochette de l'album</label>
+                <input type="file" name="album" id="ialbum">
+                <label for="igenre">Genre</label>
+                <select name="genre" id="igenre">
+                    <option value="null">Sélectionnez un genre</option>
+                    <option value="rock">Rock</option>
+                    <option value="pop">Pop</option>
+                    <option value="funk">Funk</option>
+                    <option value="electro">Electro</option>
+                    <option value="disco">Disco</option>
+                </select>
+                <input type="submit" value="Envoyer">
+            </form>
+        </fieldset>
+    </div>
 </body>
 </html>

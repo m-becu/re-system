@@ -125,68 +125,11 @@ if (isset($_GET["action"])) {
             https://www.pierre-giraud.com/html-css-apprendre-coder-cours/meta-viewport/
         -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="styles/global.css">
         <title>Accueil</title>
     </head>
     <body>
-        <fieldset>
-            <legend> <a href="?show=login">Connexion</a> / <a href="?show=register">Inscription</a> </legend>
-            <?php
-            if (isset($_GET["show"]) && $_GET["show"] === "register") {
-            ?>
-                <!-- Formulaire d'inscription -->
-                <form action="?action=register" method="post">
-                <label for="iusername">Nom d'utilisateur</label>
-                    <input id="iusername" name="username" type="text">
-                    <label for="ipassword">Mot de passe</label>
-                    <input id="ipassword" name="password" type="password">
-                    <label for="ipassword2">Vérifiez le mot de passe</label>
-                    <input id="ipassword2" name="password2" type="password">
-                    <input type="submit" value="Envoyer">
-                </form>
-            <?php
-            } else { ?>
-                <!-- Formulaire de connexion -->
-                <form action="?action=login" method="post">
-                    <label for="iusername">Nom d'utilisateur</label>
-                    <input id="iusername" name="username" type="text">
-                    <label for="ipassword">Mot de passe</label>
-                    <input id="ipassword" name="password" type="password">
-                    <input type="submit" value="Envoyer">
-                </form>
-            <?php
-            }
-            ?>
-        </fieldset>
-        <!-- Simple code pour afficher que tout vas bien avec la BDD -->
-        <p>Etat de la connexion serveur: <b>
-            <?php 
-                if ($connexion) echo("OK");
-                else echo("Erreur");
-            ?>
-        </b></p>
-        <?php
-            // Tout le code présent dans cette condition n'est exécuté qu'en présence d'une connexion client.
-            // Ainsi, c'est ici que nous afficheront les recommandations personnalisées.
-            if (isset($_SESSION["id"])) {
-                // On réalise une deuxième condition qui affichera également les outils d'administration
-                if (isset($_SESSION["admin"]) && $_SESSION["admin"] === 1) {
-                    // Dans ces conditions, le client connecté est un administrateur du site
-                    ?>
-                    <h2>Bienvenue <?=$_SESSION["login"]?>!</h2>
-                    <a href="/admin">Page d'administration</a><br>
-                    <a href="?action=logout">Déconnexion</a> 
-                    <?php
-                } else {
-                    ?>
-                    <!-- La syntaxe utilisée pour ci-dessous permet de rapidement 'echo' une variable PHP -->
-                    <h2>Bonjour <?=$_SESSION["login"]?>!</h2>
-                    <p>Vous êtes connecté au système de recommandations!</p>
-                    <a href="?action=logout">Déconnexion</a> 
-                    <?php 
-                }
-            }
-
-        ?>
+        <?php include_once("components/navigation.php") ?>
         <div class="songs">
             <ul> <?php
                 while ($songs = $sql->fetch()) {
@@ -199,7 +142,7 @@ if (isset($_GET["action"])) {
                     ?>
 
                     <li>
-                        <a href="/songs/<?=$id?>">
+                        <a href="?like=<?=$id?>">
                             <h3><?=$title?></h3>
                             <h4><?=$artist?></h4>
                             <img src="../<?=$album?>" alt="pochette">
