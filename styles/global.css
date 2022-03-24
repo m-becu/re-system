@@ -56,10 +56,9 @@ nav div.center ul {
     display: flex;
     flex-flow: row nowrap;
     list-style-type: none;
-}
 
-nav div.center ul li {
-    padding-right: 1em;
+    justify-content: space-evenly;
+    width: 100%;
 }
 
 /* A C C U E I L */
@@ -77,18 +76,31 @@ div.songs li {
 }
 
 div.songs li a {
+    position: relative;
+
     display: flex;
     flex-direction: column-reverse;
     align-items: center;
 }
 
-div.songs li a:not(:hover) h3, div.songs li a:not(:hover) h4 {
+div.songs li a:not(:hover) h3, div.songs li a:not(:hover) h4, div.songs li a:not(:hover) b {
     display: none;
 }
 
 div.songs li img {
     width: 150px;
     height: 150px;
+}
+
+div.songs li a:hover img {
+    filter: brightness(40%);
+    transition: all .3s ease;
+}
+
+div.songs li b {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 div.main {

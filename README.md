@@ -78,3 +78,13 @@ La barre de navigation contiendra les données suivantes:
 - Liens de navigation
 - Etat de la connexion
 - Bouton de déconnexion
+
+## Système de recommandation
+
+Pour réaliser notre système de recommandation, nous allons utiliser un système de 'favoris'. Le client, une fois connecté, aura la possibilité d'ajouter ses titres favoris. Nous utiliseront pour cela une table d'association client-titre. Grâce à cette table nous pourrons capter les genres musicaux les plus écoutés par notre client et lui proposer des titres similaires dans ses recommandations.
+
+### Mise en favoris
+
+La table 'likes' va référencer des couples client-titre en se servant de leurs identifiants uniques dans la base de données. Chaque fois qu'un client va mettre un titre en favoris, le système ajoutera un enregistrement dans cette table, correspondant à l'identifiant du client et celui du titre.
+
+En détails, nous allons déclarer des clés étrangères sur la table 'likes' comme le recommande l'usage.

@@ -49,7 +49,7 @@ function trouver_utilisateur($login) {
     // On prépare la requête pour des questions de sécurité
     $req = $db->prepare($sql);
 
-    $req->execute([ $login, ]);
+    $req->execute([ $login ]);
     $user = $req->fetch();
 
     return $user;
@@ -145,6 +145,55 @@ function validation_image($name) {
     } catch (RuntimeException $e) {
         header("Location: ../?error=".$e->getMessage());
     }
+}
+
+function ajouter_favori($user_id, $song_id) {
+    $connexion = connexion_bdd();
+
+    $sql = "SELECT * FROM likes WHERE user_id = :userid AND song_id = :songid";
+    $req = $connexion->prepare($sql);
+    $req->execute(array(
+        'userid' => $user_id,
+        'songid' => $song_id,
+    ));
+    
+    $res = null;
+    // On récupère les données renvoyées par la requête preparée.
+    // Si le tableau que l'on a récupéré n'est pas vide, c'est que le client à déjà liké ce titre.
+    foreach ($req as $row) { $res = $row; }
+
+    if ($res) {
+        // Ce client à déjà ajouté ce titre dans ses favoris, on le retire.
+        $sql = "DELETE FROM likes WHERE user_id = :userid AND song_id = :songid";
+        $req = $connexion->prepare($sql)->execute(array(
+            'userid' => $user_id,
+            'songid' => $song_id,
+        ));
+
+    } else {
+        // Le client n'avait pas encore mis ce titre en favori, on l'ajoute donc.
+        $sql = "INSERT INTO likes (user_id, song_id) VALUES (:userid, :songid)";
+        $connexion->prepare($sql)->execute(array(
+            'userid' => $user_id,
+            'songid' => $song_id,
+        ));
+    }
+}
+
+function recuperer_favoris($user_id) {
+    $connexion = connexion_bdd();
+
+    $sql = "SELECT songs.* FROM songs INNER JOIN likes ON songs.id = likes.song_id JOIN users ON users.id = :userid";
+    $req = $connexion->prepare($sql);
+    $req->execute(array(
+        'userid' => $user_id,
+    ));
+    
+    $res[] = null;
+    // On récupère les données renvoyées par la requête preparée.
+    // Si le tableau que l'on a récupéré n'est pas vide, c'est que le client à déjà liké ce titre.
+    foreach ($req as $row) { $res[] = $row; }
+    return $res;
 }
 
 ?>

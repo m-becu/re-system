@@ -61,6 +61,8 @@ if (isset($_GET["action"])) {
                         }
                     }
                 }
+                header("Location: /");
+
             } catch (Exception $e) {
                 die('Erreur : '.$e->getMessage());
             }
@@ -96,6 +98,8 @@ if (isset($_GET["action"])) {
                         }
                     }
                 }
+                header("Location: /");
+
             } catch (Exception $e) {
                 die('Erreur : '.$e->getMessage());
             }
@@ -104,6 +108,14 @@ if (isset($_GET["action"])) {
         case 'logout':
             session_destroy();
             $_SESSION = array();
+            header("Location: /");
+            break;
+        
+        case 'like':
+            if (isset($_GET["id"]) && isset($_SESSION["id"])) {
+                ajouter_favori( (int)$_SESSION["id"], (int)$_GET["id"] );
+                header("Location: /");
+            }
             break;
         
         default:
@@ -129,26 +141,50 @@ if (isset($_GET["action"])) {
         <title>Accueil</title>
     </head>
     <body>
-        <?php include_once("components/navigation.php") ?>
+        <?php 
+            include_once("components/navigation.php"); 
+            if (isset($_SESSION["id"])) {
+
+                $favs = recuperer_favoris($_SESSION["id"]);
+                if (count($favs) > 1) { ?>
+                    <div class="favs songs">
+                        <ul> <?php
+                            foreach ($favs as $i => $fav) { 
+                                if ($i !== 0) { ?>
+                                <li>
+                                    <a href="?action=like&id=<?=$fav['id']?>">
+                                        <img src="../<?=$fav['album']?>" alt="pochette">
+                                        <b>💖</b>
+                                    </a>
+                                    <h3><?=$fav['title']?></h3>
+                                    <h4><?=$fav['artist']?></h4>
+                                </li>
+                            <?php }
+                            }
+                        ?>
+                        </ul>
+                    </div>
+                <?php
+                }
+            }
+        ?>
         <div class="songs">
             <ul> <?php
                 while ($songs = $sql->fetch()) {
-
                     $id = $songs['id'];
                     $title = $songs['title'];
                     $artist = $songs['artist'];
                     $album = $songs['album'];
                     $genre = $songs['genre'];
-                    ?>
-
-                    <li>
-                        <a href="?like=<?=$id?>">
-                            <h3><?=$title?></h3>
-                            <h4><?=$artist?></h4>
-                            <img src="../<?=$album?>" alt="pochette">
-                        </a>
-                    </li>
-
+                ?>
+                <li>
+                    <a href="?action=like&id=<?=$id?>">
+                        <img src="../<?=$album?>" alt="pochette">
+                        <b>💖</b>
+                    </a>
+                    <h3><?=$title?></h3>
+                    <h4><?=$artist?></h4>
+                </li>
                 <?php } ?>
             </ul>
         </div>
