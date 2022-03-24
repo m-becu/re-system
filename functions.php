@@ -55,4 +55,96 @@ function trouver_utilisateur($login) {
     return $user;
 }
 
+function validation_image($name) {
+    try {
+        /**
+         * J'ai eu pas mal de difficultées pour faire fonctionner
+         * la sauvegarde d'image, ce script fonctionne bien et gère les erreurs.
+         * 
+         * Il y a encore beaucoup de failles de sécurité qui ne sont
+         * pas comblée ici, voir commentaires :
+         * https://www.php.net/manual/en/features.file-upload.php
+         */
+
+        if (!isset($_FILES[$name]['error']) || is_array($_FILES[$name]['error'])) {
+            throw new RuntimeException('Paramètres invalides.');
+        }
+
+        switch ($_FILES[$name]['error']) {
+            case UPLOAD_ERR_OK:
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                throw new RuntimeException('Aucun fichier envoyé.');
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                throw new RuntimeException('Limite de taille de fichier dépassée.');
+            default:
+                throw new RuntimeException('Erreurs inconnues.');
+                break;
+        }
+
+        // Test taille de fichier une seconde fois
+        // Potentiellement inutile
+        
+        if ($_FILES[$name]['size'] > 1000000) {
+            throw new RuntimeException('Limite de taille de fichier dépassée.');
+        }
+
+        // Ne jamais faire confiance à la valeur 'MIME' d'un fichier
+        // On vérifie le type nous-même
+        // Cette vérification est totalement insuffisante car on peux facilement tricher.
+
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        if (false === $ext = array_search(
+            $finfo->file($_FILES[$name]['tmp_name']),
+            array(
+                'jpg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+            ),
+            true
+        )) {
+            throw new RuntimeException('Format de fichier invalide');
+        }
+
+        // Ne jamais faire confiance au nom du fichier
+        // Il faut soit le valider, soit générer un nom en se 
+        // servant des données binaires de l'image.
+        
+        // https://github.com/Glavin001/atom-beautify/issues/1108#issuecomment-272012827
+        $filename = @tempnam('../images', '');
+        unlink($filename);
+        
+        $data = explode("\\", $filename);
+        $gename = explode(".", end($data))[0];
+
+        if (!move_uploaded_file(
+            $_FILES[$name]['tmp_name'],
+            sprintf('../images/%s.%s',
+                $gename,
+                $ext
+            )
+        )) {
+            throw new RuntimeException('Impossible de déplacer le fichier');
+        }
+
+        return "".$gename.".".$ext;
+        
+        /*
+            if (!move_uploaded_file(
+                $_FILES[$name]['tmp_name'],
+                sprintf('../images/%s.%s',
+                    $_FILES[$name]['tmp_name'],
+                    $ext
+                )
+            )) {
+                throw new RuntimeException('Impossible de déplacer le fichier');
+            }
+        */
+
+    } catch (RuntimeException $e) {
+        header("Location: ../?error=".$e->getMessage());
+    }
+}
+
 ?>
