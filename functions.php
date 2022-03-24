@@ -1,8 +1,4 @@
 <?php // Fichier `functions.php`
-/** 
-    Fonctions à implémenter:
-    - Connexion à la base de données
-*/
 
 function connexion_bdd() {
     // Création d'une variable pour la connexion
@@ -43,6 +39,20 @@ function connexion_bdd() {
     // Si tout c'est bien passé, la variable BDD contient une connexion.
     // Dans le cas contraire c'est la variable 'null' nulle qui est renvoyée.
     return $bdd;
+}
+
+function trouver_utilisateur($login) {
+    // On ouvre la connexion
+    $db = connexion_bdd();
+    // La requête SQL cherche toutes les informations d'un utilisateur avec le pseudo spécifié
+    $sql = "SELECT * FROM users WHERE login = ?";
+    // On prépare la requête pour des questions de sécurité
+    $req = $db->prepare($sql);
+
+    $req->execute([ $login, ]);
+    $user = $req->fetch();
+
+    return $user;
 }
 
 ?>
