@@ -51,3 +51,15 @@ Pour se connecter à la base de donnée, nous allons programmer une fonction qui
 Pour se faire nous allons créer un fichier `functions.php`. Plus tard nous y ajouterons toutes les autres fonctions susceptibles d'être réutilisées un peu partout.
 
 Une fois la fonction de connexion écrite, nous pouvons l'appeler en ajoutant les fonctions depuis n'importe qu'elle autre page de notre site.
+
+### Connexion / Inscription client
+
+Pour gérer la connexion client, on va se servir d'un formulaire HTML pour récupérer les infos du client via la méthode POST pour des raisons de sécurité. Une fois les données envoyées, nous utiliseront GET pour définir une "action" de connexion, qui sera détectée par notre page d'accueil. Ensuite on essaiera de conncecter le client avec ses informations.
+
+Dans l'action de notre formulaire, on écrit "?action=login" ce qui a en réalité pour effet d'affecter la valeur 'login' à la variable $_GET["action"], cela nous permet de détecter la connexion.
+
+Pour vérifier la connexion client, on va d'abord rechercher si son nom d'utilisateur existe. Puisque c'est quelque-chose que l'on va faire souvent, nous écrirons une autre fonction globale. Une fois le login récupéré, on va ensuite vérifier la correspondance du mot de passe. Si tout est en ordre, le client est maintenant connecté.
+
+Pour l'inscription c'est plus ou moins la même chose, on va utiliser l'action 'register' cette fois-ci, on va récupérer cette action sur la page d'accueil et ajouter l'utilisateur dans la base. La différence est que cette fois-ci on doit vérifier que l'utilisateur n'est pas déjà dans la base, et connecter automatiquement celui qui réussi à s'inscrire.
+
+Pour le moment le seul moyen de créer un compte administrateur est en venant modifier le contenu de la base de donnée directement, en changeant la valeur de la colonne 'admin' par 1. Nous créons quelques utilisateurs pour nos tests : Pierre (admin), Paul & Jacques.
