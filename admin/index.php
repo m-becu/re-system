@@ -52,8 +52,16 @@ if (isset($_GET["action"])) {
 
         case 'modify':
             if (isset($_POST["title"]) && isset($_POST["artist"])) {
+                $sql = "UPDATE songs SET title = :title, artist = :artist, album = :album, genre = :genre WHERE `songs`.`id` = :id;";
+                $img = validation_image('album');
 
-                header("Location: /admin");
+                $connexion->prepare($sql)->execute(array(
+                    'title'  => $_POST['title'],
+                    'artist' => $_POST['artist'],
+                    'genre'  => $_POST['genre'],
+                    'album'  => "images/".$img,
+                ));
+                header("Location: /admin?info=success");
             }
             break;
         
@@ -94,7 +102,10 @@ if (isset($_GET["action"])) {
                 <fieldset>
                     <legend>Formulaire d'édition d'un morceau</legend>
                     <?php if (isset($_GET["action"]) && isset($_GET["id"])) { 
-                        $modify = $songs[$_GET["id"]];
+                        // On retire 1 au nombre identifiant le titre car les tableaux PHP sont indexés à partir de 0
+                        // Et les titres de la base sont indexés à partir de 1
+                        // Donc la chanson d'id 3 est à la position 2 du tableau.
+                        $modify = $songs[$_GET["id"]-1];
                     ?>
                     <form action="?action=modify" method="post" enctype="multipart/form-data">
                         <span>
