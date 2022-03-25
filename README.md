@@ -88,3 +88,11 @@ Pour réaliser notre système de recommandation, nous allons utiliser un systèm
 La table 'likes' va référencer des couples client-titre en se servant de leurs identifiants uniques dans la base de données. Chaque fois qu'un client va mettre un titre en favoris, le système ajoutera un enregistrement dans cette table, correspondant à l'identifiant du client et celui du titre.
 
 En détails, nous allons déclarer des clés étrangères sur la table 'likes' comme le recommande l'usage.
+
+### Génération des recommandations
+
+Tous nos calculs de recommandations seront basés sur les titres likés par le client. L'idée est de proposer les trois titres les plus susceptibles de plaire au client en se basant sur les deux artistes les plus likés et le genre le plus apprécié.
+
+Pour obtenir l'artiste favori, on va regarder dans les titres likés, et prendre l'artiste qui revient le plus souvent. On fait la même chose avec le genre musical.
+
+Enfin, on parcourt les titres non likés et on sélectionne les 3 premiers répondants aux critères de genre et d'artiste favoris.

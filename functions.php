@@ -196,4 +196,68 @@ function recuperer_favoris($user_id) {
     return $res;
 }
 
+function artistes_favoris($user_id) {
+    $connexion = connexion_bdd();
+
+    // Récupérer les 3 artistes favoris
+    $sql = "SELECT songs.artist, COUNT(songs.artist) AS `value_occurrence` FROM songs INNER JOIN likes ON songs.id = likes.song_id JOIN users ON users.id = :userid GROUP BY songs.artist ORDER BY `value_occurrence` DESC LIMIT 3";
+    $req = $connexion->prepare($sql);
+    $req->execute(array(
+        'userid' => $user_id,
+    ));
+
+    $fav_artistes = [];
+    foreach ($req as $row) { $fav_artistes[] = $row; }
+
+    return $fav_artistes;
+}
+
+function genres_favoris($user_id) {
+    $connexion = connexion_bdd();
+
+    // Récupérer les 3 genres favoris
+    $sql = "SELECT songs.genre, COUNT(songs.genre) AS `value_occurrence` FROM songs INNER JOIN likes ON songs.id = likes.song_id JOIN users ON users.id = :userid GROUP BY songs.genre ORDER BY `value_occurrence` DESC LIMIT 3";
+    $req = $connexion->prepare($sql);
+    $req->execute(array(
+        'userid' => $user_id,
+    ));
+
+    $fav_genres = [];
+    foreach ($req as $row) { $fav_genres[] = $row; }
+
+    return $fav_genres;
+}
+
+function generer_recommandations($user_id) {
+
+    $favs = recuperer_favoris($user_id);
+
+    $meilleur_artiste = artistes_favoris($user_id);
+    $meilleur_genre = genres_favoris($user_id);
+
+    // echo("ARTISTES & GENRES");
+    // var_dump($meilleur_artiste);
+    // var_dump($meilleur_genre);
+    
+    $connexion = connexion_bdd();
+    $titres_recommandes = [];
+
+    for ($i=0; $i < min(count($meilleur_artiste), count($meilleur_genre)); $i++) { 
+
+        $sql = "SELECT * FROM songs LEFT OUTER JOIN likes ON songs.id = likes.song_id WHERE (songs.artist = :artiste OR songs.genre = :genre) AND likes.user_id IS NULL LIMIT 1";
+        $req = $connexion->prepare($sql);
+
+        $req->execute(array(
+            'artiste' => $meilleur_artiste[$i]['artist'],
+            'genre'   => $meilleur_genre[$i]['genre'],
+        ));
+
+        foreach ($req as $row) { $titres_recommandes[] = $row; }
+        // var_dump($titres_recommandes);
+
+    }
+
+    return $titres_recommandes;
+}
+
 ?>

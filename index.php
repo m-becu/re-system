@@ -145,9 +145,31 @@ if (isset($_GET["action"])) {
             include_once("components/navigation.php"); 
             if (isset($_SESSION["id"])) {
 
+                $recoms = generer_recommandations($_SESSION["id"]);
+                if (count($recoms) > 0) { ?>
+                    <div class="recoms songs">
+                        <h2>Vous pourriez aimer</h2>
+                        <ul> <?php
+                            foreach ($recoms as $i => $recom) {
+                                ?>
+                                <li>
+                                    <a href="?action=like&id=<?=$recom['id']?>">
+                                        <img src="../<?=$recom['album']?>" alt="pochette">
+                                        <b>💖</b>
+                                    </a>
+                                    <h3><?=$recom['title']?></h3>
+                                    <h4><?=$recom['artist']?></h4>
+                                </li>
+                            <?php } ?>
+                        </ul>
+                    </div>
+                <?php
+                }
+
                 $favs = recuperer_favoris($_SESSION["id"]);
                 if (count($favs) > 1) { ?>
                     <div class="favs songs">
+                        <h2>Vos favoris</h2>
                         <ul> <?php
                             foreach ($favs as $i => $fav) { 
                                 if ($i !== 0) { ?>
@@ -169,6 +191,7 @@ if (isset($_GET["action"])) {
             }
         ?>
         <div class="songs">
+            <h2>Tous les titres</h2>
             <ul> <?php
                 while ($songs = $sql->fetch()) {
                     $id = $songs['id'];
