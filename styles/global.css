@@ -63,6 +63,11 @@ nav div.center ul {
 
 /* A C C U E I L */
 
+div.songs h2 {
+    padding-left: 2em;
+    padding-top: 1em;
+}
+
 div.songs ul {
     display: flex;
     flex-flow: row wrap;
