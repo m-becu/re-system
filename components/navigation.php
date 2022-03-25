@@ -14,7 +14,7 @@
         <?php } ?>
         <ul>
             <li><a href="/">Accueil</a></li>
-            <?php
+            <?php // On affiche le lien que si le client à le droit de s'y rendre
                 if (isset($_SESSION["id"]) && $_SESSION["admin"] === 1) { ?>
                     <li><a href="/admin">Administration</a></li>
                 <?php
@@ -24,6 +24,7 @@
     </div>
     <div class="right">
         <?php
+        // Si un client est connecté, il n'a plus besoin de le faire, on remplace donc les formulaires d'inscription/connexion par un lien de déconnexion grâce à une condition.
         if (isset($_SESSION["id"])) { ?>
             <a href="/?action=logout">Déconnexion</a>
         <?php

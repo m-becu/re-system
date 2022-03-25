@@ -1,5 +1,6 @@
 <?php // Fichier `functions.php`
 
+// Fonction de connexion qui renvoie un objet PDO connecté à la BDD
 function connexion_bdd() {
     // Création d'une variable pour la connexion
     $bdd = null;
@@ -41,6 +42,7 @@ function connexion_bdd() {
     return $bdd;
 }
 
+// On cherche un client dans la base à partir de son pseudo
 function trouver_utilisateur($login) {
     // On ouvre la connexion
     $db = connexion_bdd();
@@ -55,6 +57,8 @@ function trouver_utilisateur($login) {
     return $user;
 }
 
+// Cette fonction gère la validation des images envoyées lorsque l'on ajoute un titre.
+// C'est à dire qu'on vérifie que l'image n'est pas trop grosse, qu'elle ne contient pas d'extensions étranges...
 function validation_image($name) {
     try {
         /**
@@ -66,16 +70,23 @@ function validation_image($name) {
          * https://www.php.net/manual/en/features.file-upload.php
          */
 
+        // Lorsqu'on utilise l'input de type "file" en HTML, PHP récupère l'image envoyée dans la variable $_FILES, ce qui nous permet de la valider ici.
+        // Si on arrive pas à accèder aux variables 'error' du fichier c'est que celui-ci est invalide, car cette variable est toujours mise en place, même si l'erreur qu'elle contient n'en est pas une.
         if (!isset($_FILES[$name]['error']) || is_array($_FILES[$name]['error'])) {
             throw new RuntimeException('Paramètres invalides.');
         }
 
         switch ($_FILES[$name]['error']) {
+            // Comme expliqué plus haut, la variable erreur peut aussi contenir l'information que tout vas bien
+            // C'est le cas juste ici, on dans le cas où erreur vaut UPLOAD_ERR_OK, alors on peut continuer.
+            // Les autres cas sont des exemple des erreurs les plus fréquentes, que l'on va se charger de traiter
             case UPLOAD_ERR_OK:
                 break;
             case UPLOAD_ERR_NO_FILE:
                 throw new RuntimeException('Aucun fichier envoyé.');
             case UPLOAD_ERR_INI_SIZE:
+                // L'erreur UPLOAD_ERR_INI_SIZE mérite qu'on l'explique car très peu fréquente:
+                // Elle ne prend sont sens que lorsque la variable POST_MAX_SIZE (taille maximale d'une requête POST) est plus grande que la variable UPLOAD_MAX_FILESIZE (taille maximale d'un upload unique de fichier par ex).
             case UPLOAD_ERR_FORM_SIZE:
                 throw new RuntimeException('Limite de taille de fichier dépassée.');
             default:
@@ -111,13 +122,15 @@ function validation_image($name) {
         // Il faut soit le valider, soit générer un nom en se 
         // servant des données binaires de l'image.
         
+        // Ici on génère un identifiant unique grâce à tempnam, qui est précédée d'un '@' pour supprimer les 'notices' que cette fonction renvoie (des erreurs qui n'en sont pas et c'est très moche sur le site).
         // https://github.com/Glavin001/atom-beautify/issues/1108#issuecomment-272012827
-        $filename = @tempnam('../images', '');
-        unlink($filename);
+        $filename = @tempnam('../images', ''); // Générer un identifiant unique dans ce répertoire
+        unlink($filename); // Supprimer le fichier du disque
         
-        $data = explode("\\", $filename);
-        $gename = explode(".", end($data))[0];
-
+        $data = explode("\\", $filename); // On découpe la chaîne de caractère à chaque '\'
+        $gename = explode(".", end($data))[0]; // On découpe la chaîne à chaque '.'
+        // Ce qui nous donne le nom du fichier, débarassé du chemin et de l'extension .tmp
+        // On déplace alors notre image dans le bon dossier, et on change son nom pour notre identifiant aleatoire
         if (!move_uploaded_file(
             $_FILES[$name]['tmp_name'],
             sprintf('../images/%s.%s',
@@ -129,18 +142,6 @@ function validation_image($name) {
         }
 
         return "".$gename.".".$ext;
-        
-        /*
-            if (!move_uploaded_file(
-                $_FILES[$name]['tmp_name'],
-                sprintf('../images/%s.%s',
-                    $_FILES[$name]['tmp_name'],
-                    $ext
-                )
-            )) {
-                throw new RuntimeException('Impossible de déplacer le fichier');
-            }
-        */
 
     } catch (RuntimeException $e) {
         header("Location: ../?error=".$e->getMessage());
@@ -150,6 +151,7 @@ function validation_image($name) {
 function ajouter_favori($user_id, $song_id) {
     $connexion = connexion_bdd();
 
+    // Lorsque l'on effectue une requête SQL, on prend toujours soin de la 'préparer' et de passer toutes les variables venant du client dans un filtre de sécurité. Cela évite notamment les attaques par injection SQL.
     $sql = "SELECT * FROM likes WHERE user_id = :userid AND song_id = :songid";
     $req = $connexion->prepare($sql);
     $req->execute(array(
@@ -182,7 +184,7 @@ function ajouter_favori($user_id, $song_id) {
 
 function recuperer_favoris($user_id) {
     $connexion = connexion_bdd();
-
+    // Ici la liaison de tables dans notre requête nous permet d'afficher tous les titres likés par notre utilisateur. Cette requête n'est bien sûr pas possible sans notre tables 'likes' qui référence tous les couples titre/client qui existent.
     $sql = "SELECT songs.* FROM songs INNER JOIN likes ON songs.id = likes.song_id JOIN users ON users.id = :userid";
     $req = $connexion->prepare($sql);
     $req->execute(array(
@@ -242,6 +244,8 @@ function generer_recommandations($user_id) {
     $connexion = connexion_bdd();
     $titres_recommandes = [];
 
+    // Les variables "$meilleur_" ne retournent pas toujours 3 éléments, ainsi, on va utiliser la taille minimale de ces deux variables (ex. si on a 3 artistes mais seulement 2 genres, on utilisera 2 pour nos calculs).
+    // Ce chiffre nous donne alors le nombre de recommandations différentes que l'on peut générer avec notre algorithme: avec notre exemple on va générer 2 recommandations c'est à dire que notre boucle for va tourner deux fois et ajouter à chaque fois une recommandation dans notre tableau "$titres_recommandes".
     for ($i=0; $i < min(count($meilleur_artiste), count($meilleur_genre)); $i++) { 
 
         $sql = "SELECT * FROM songs LEFT OUTER JOIN likes ON songs.id = likes.song_id WHERE (songs.artist = :artiste OR songs.genre = :genre) AND likes.user_id IS NULL LIMIT 1";

@@ -1,11 +1,14 @@
 <?php
+// Utilisation des sessions
 session_start();
-if (!isset($_SESSION["admin"]) && !isset($_SESSION["id"])) header("Location: /");
-if ($_SESSION["admin"] !== 1) header("Location: /");
-
+// Cette page est réservée au administrateur, si aucun client n'est connecté ou que le client connecté n'est pas un administrateur alors on redirige immédiatement le client vers la page d'accueil.
+if (!isset($_SESSION["admin"]) && !isset($_SESSION["id"])) header("Location: /"); // Aucun client connecté
+if ($_SESSION["admin"] !== 1) header("Location: /"); // Client pas un admin
+// Autrement, on récupère les fonctions.
 require_once("../functions.php");
+// Et on se connecte à la base.
 $connexion = connexion_bdd();
-
+// Tout comme le gestionnaire d'actions ou d'erreurs, le gestionnaire d'infos nous permet d'afficher des messages informatifs au client, notamment lorsque l'on envoie notre nouveau titre dans la base.
 if (isset($_GET["info"])) {
     switch ($_GET["info"]) {
         case 'success':
@@ -22,6 +25,7 @@ if (isset($_GET["info"])) {
 
 if (isset($_GET["action"])) {
     switch ($_GET["action"]) {
+        // Si on réussi à ajouter le nouveau titre, on relocalise pour informer l'utilisateur.
         case 'add':
             if (isset($_POST["title"]) && isset($_POST["artist"])) {
                 // var_dump($_FILES);
@@ -39,7 +43,8 @@ if (isset($_GET["action"])) {
             break;
         
         default:
-            # code...
+            // Par défaut on relocalise vers une URL propre.
+            header("Location: /admin");
             break;
     }
 }
