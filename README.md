@@ -91,8 +91,19 @@ En détails, nous allons déclarer des clés étrangères sur la table 'likes' c
 
 ### Génération des recommandations
 
-Tous nos calculs de recommandations seront basés sur les titres likés par le client. L'idée est de proposer les trois titres les plus susceptibles de plaire au client en se basant sur les deux artistes les plus likés et le genre le plus apprécié.
+Tous nos calculs de recommandations seront basés sur les titres likés par le client. L'idée est de proposer les titres les plus susceptibles de plaire au client en se basant sur les artistes et les genres les plus appréciés.
 
-Pour obtenir l'artiste favori, on va regarder dans les titres likés, et prendre l'artiste qui revient le plus souvent. On fait la même chose avec le genre musical.
+Pour obtenir les recommandations, on va regarder dans les titres likés, et prendre les trois artistes qui reviennent le plus souvent. On fait la même chose avec les genres. Enfin, on parcourt les titres non likés et on sélectionne ceux répondants aux critères de genre et d'artiste favoris.
 
-Enfin, on parcourt les titres non likés et on sélectionne les 3 premiers répondants aux critères de genre et d'artiste favoris.
+## Conclusion & Axes d'amélioration
+
+Le site web est terminé, il répond à tous les impératifs de l'exercice à savoir:
+
+- Rattaché à une base de données: c'est le cas puisque nous avons mis en place une connexion (cf. fonctions.php)
+- Certaines pages doivent enregistrer du contenu dans la base de données: c'est le rôle de la page d'administration et de l'inscription utilisateur
+- D’autres pages doivent afficher du contenu à partie de la base de données: c'est le rôle de la page d'accueil qui affiche tous les titres de la base
+- Tout le code doit être bien commenté
+
+Une amélioration significative du site serait d'ajouter des tables dans la base pour séparer les albums et les artistes des chansons, avoir des recommandations par artiste, par album. D'améliorer le style et de changer la méthodologie utilisée pour le développement. Un plus grand nombre de titres disponibles pourrait améliorer le système de recommandations.
+
+Le système est très simpliste et pourrait être plus précis en se basant sur des similitudes de rythmique, d'instruments, de temps d'écoute, d'humeur, et bien d'autres critères.
