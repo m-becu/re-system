@@ -58,7 +58,7 @@ function trouver_utilisateur($login) {
 }
 
 // Cette fonction gère la validation des images envoyées lorsque l'on ajoute un titre.
-// C'est à dire qu'on vérifie que l'image n'est pas trop grosse, qu'elle ne contient pas d'extensions étranges...
+// On vérifie que l'image n'est pas trop lourde, qu'elle ne contient pas d'extensions étranges, etc.
 function validation_image($name) {
     try {
         /**
@@ -148,6 +148,8 @@ function validation_image($name) {
     }
 }
 
+// Créer un couple client/titre dans la table des favoris.
+// ex. Si Pierre(id=2) aime le titre Within(id=3) alors on ajoute le couple 2 / 3 dans la table.
 function ajouter_favori($user_id, $song_id) {
     $connexion = connexion_bdd();
 
@@ -182,6 +184,7 @@ function ajouter_favori($user_id, $song_id) {
     }
 }
 
+// Cette fonction renvoie les titres favoris du client dont l'identifiant est specifié.
 function recuperer_favoris($user_id) {
     $connexion = connexion_bdd();
     // Ici la liaison de tables dans notre requête nous permet d'afficher tous les titres likés par notre utilisateur. Cette requête n'est bien sûr pas possible sans notre tables 'likes' qui référence tous les couples titre/client qui existent.
@@ -198,6 +201,7 @@ function recuperer_favoris($user_id) {
     return $res;
 }
 
+// Cette fonction génère les trois artistes les plus appréciés du client.
 function artistes_favoris($user_id) {
     $connexion = connexion_bdd();
 
@@ -214,6 +218,7 @@ function artistes_favoris($user_id) {
     return $fav_artistes;
 }
 
+// Cette fonction génère les trois genres les plus appréciés du client.
 function genres_favoris($user_id) {
     $connexion = connexion_bdd();
 
@@ -230,16 +235,13 @@ function genres_favoris($user_id) {
     return $fav_genres;
 }
 
+// La fonction de recommandations génère une liste de titres non likés susceptibles de plaire au client.
 function generer_recommandations($user_id) {
 
     $favs = recuperer_favoris($user_id);
 
-    $meilleur_artiste = artistes_favoris($user_id);
-    $meilleur_genre = genres_favoris($user_id);
-
-    // echo("ARTISTES & GENRES");
-    // var_dump($meilleur_artiste);
-    // var_dump($meilleur_genre);
+    $artistes = artistes_favoris($user_id);
+    $genres = genres_favoris($user_id);
     
     $connexion = connexion_bdd();
     $titres_ids = [];
@@ -247,23 +249,25 @@ function generer_recommandations($user_id) {
 
     // Les variables "$meilleur_" ne retournent pas toujours 3 éléments, ainsi, on va utiliser la taille minimale de ces deux variables (ex. si on a 3 artistes mais seulement 2 genres, on utilisera 2 pour nos calculs).
     // Ce chiffre nous donne alors le nombre de recommandations différentes que l'on peut générer avec notre algorithme: avec notre exemple on va générer 2 recommandations c'est à dire que notre boucle for va tourner deux fois et ajouter à chaque fois une recommandation dans notre tableau "$titres_recommandes".
-    for ($i=0; $i < min(count($meilleur_artiste), count($meilleur_genre)); $i++) { 
-
+    // Si on utilise cette méthode c'est pour toujours avoir un couple genre/artiste à fournir dans notre requête
+    for ($i=0; $i < min(count($artistes), count($genres)); $i++) { 
+        // Cette requête SQL renvoie un maximum de 3 propositions en rapport avec l'artiste ou le genre.
+        // A force de combiner les différents critères on obtient une liste d'en moyenne 3 à 5 titres.
         $sql = "SELECT DISTINCT * FROM songs LEFT OUTER JOIN likes ON songs.id = likes.song_id WHERE (songs.artist = :artiste OR songs.genre = :genre) AND likes.user_id IS NULL LIMIT 3";
         $req = $connexion->prepare($sql);
 
         $req->execute(array(
-            'artiste' => $meilleur_artiste[$i]['artist'],
-            'genre'   => $meilleur_genre[$i]['genre'],
+            'artiste' => $artistes[$i]['artist'],
+            'genre'   => $genres[$i]['genre'],
         ));
 
         foreach ($req as $row) { 
-            if (in_array($row['id'], $titres_ids)) continue;
-            $titres_ids[] = $row['id'];
+            // Pour éviter les doublons dans nos résultats on ajoute l'identifiant unique de chaque titre recommandé à une liste. On n'ajoute alors, dans notre liste de recommandations, que les titres dont l'identifiant n'est pas déjà stocké.
+            if (in_array($row['id'], $titres_ids)) continue; // Si l'identifiant est dans la liste on boucle.
+            // Si on arrive ici, c'est que le titre n'est pas un doublon, on ajoute alors l'identifiant dans notre liste et on ajoute notre titre à la liste de recommandations.
+            $titres_ids[] = $row['id']; 
             $titres_recommandes[] = $row; 
         }
-        // var_dump($titres_recommandes);
-
     }
 
     return $titres_recommandes;
