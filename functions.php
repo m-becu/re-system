@@ -185,7 +185,7 @@ function ajouter_favori($user_id, $song_id) {
 function recuperer_favoris($user_id) {
     $connexion = connexion_bdd();
     // Ici la liaison de tables dans notre requête nous permet d'afficher tous les titres likés par notre utilisateur. Cette requête n'est bien sûr pas possible sans notre tables 'likes' qui référence tous les couples titre/client qui existent.
-    $sql = "SELECT songs.* FROM songs INNER JOIN likes ON songs.id = likes.song_id JOIN users ON users.id = :userid";
+    $sql = "SELECT songs.* FROM songs INNER JOIN likes ON songs.id = likes.song_id JOIN users ON users.id = likes.user_id WHERE users.id = :userid";
     $req = $connexion->prepare($sql);
     $req->execute(array(
         'userid' => $user_id,
@@ -202,7 +202,7 @@ function artistes_favoris($user_id) {
     $connexion = connexion_bdd();
 
     // Récupérer les 3 artistes favoris
-    $sql = "SELECT songs.artist, COUNT(songs.artist) AS `value_occurrence` FROM songs INNER JOIN likes ON songs.id = likes.song_id JOIN users ON users.id = :userid GROUP BY songs.artist ORDER BY `value_occurrence` DESC LIMIT 3";
+    $sql = "SELECT DISTINCT songs.artist, COUNT(songs.artist) AS `value_occurrence` FROM songs INNER JOIN likes ON songs.id = likes.song_id JOIN users ON users.id = likes.user_id WHERE users.id = :userid GROUP BY songs.artist ORDER BY `value_occurrence` DESC LIMIT 3";
     $req = $connexion->prepare($sql);
     $req->execute(array(
         'userid' => $user_id,
@@ -218,7 +218,7 @@ function genres_favoris($user_id) {
     $connexion = connexion_bdd();
 
     // Récupérer les 3 genres favoris
-    $sql = "SELECT songs.genre, COUNT(songs.genre) AS `value_occurrence` FROM songs INNER JOIN likes ON songs.id = likes.song_id JOIN users ON users.id = :userid GROUP BY songs.genre ORDER BY `value_occurrence` DESC LIMIT 3";
+    $sql = "SELECT DISTINCT songs.genre, COUNT(songs.genre) AS `value_occurrence` FROM songs INNER JOIN likes ON songs.id = likes.song_id JOIN users ON users.id = likes.user_id WHERE users.id = :userid GROUP BY songs.genre ORDER BY `value_occurrence` DESC LIMIT 3";
     $req = $connexion->prepare($sql);
     $req->execute(array(
         'userid' => $user_id,
@@ -242,13 +242,14 @@ function generer_recommandations($user_id) {
     // var_dump($meilleur_genre);
     
     $connexion = connexion_bdd();
+    $titres_ids = [];
     $titres_recommandes = [];
 
     // Les variables "$meilleur_" ne retournent pas toujours 3 éléments, ainsi, on va utiliser la taille minimale de ces deux variables (ex. si on a 3 artistes mais seulement 2 genres, on utilisera 2 pour nos calculs).
     // Ce chiffre nous donne alors le nombre de recommandations différentes que l'on peut générer avec notre algorithme: avec notre exemple on va générer 2 recommandations c'est à dire que notre boucle for va tourner deux fois et ajouter à chaque fois une recommandation dans notre tableau "$titres_recommandes".
     for ($i=0; $i < min(count($meilleur_artiste), count($meilleur_genre)); $i++) { 
 
-        $sql = "SELECT * FROM songs LEFT OUTER JOIN likes ON songs.id = likes.song_id WHERE (songs.artist = :artiste OR songs.genre = :genre) AND likes.user_id IS NULL LIMIT 1";
+        $sql = "SELECT DISTINCT * FROM songs LEFT OUTER JOIN likes ON songs.id = likes.song_id WHERE (songs.artist = :artiste OR songs.genre = :genre) AND likes.user_id IS NULL LIMIT 3";
         $req = $connexion->prepare($sql);
 
         $req->execute(array(
@@ -256,7 +257,11 @@ function generer_recommandations($user_id) {
             'genre'   => $meilleur_genre[$i]['genre'],
         ));
 
-        foreach ($req as $row) { $titres_recommandes[] = $row; }
+        foreach ($req as $row) { 
+            if (in_array($row['id'], $titres_ids)) continue;
+            $titres_ids[] = $row['id'];
+            $titres_recommandes[] = $row; 
+        }
         // var_dump($titres_recommandes);
 
     }
