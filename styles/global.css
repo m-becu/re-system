@@ -7,9 +7,10 @@
 }
 
 html, body {
-    width: 100vw;
+    max-width: 100vw;
     height: 100vh;
     font-size: 16px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 /* N A V I G A T I O N */
@@ -28,6 +29,10 @@ nav {
 nav form, nav div.left {
     display: flex;
     flex-flow: column wrap;
+}
+
+nav div.left p b {
+    color: green;
 }
 
 nav form label {
@@ -122,6 +127,11 @@ div.admin {
 
 div.admin > div {
     padding: 1em;
+}
+
+div.list table, div.list th, div.list td {
+    border: 1px solid gainsboro;
+    border-collapse: collapse;
 }
 
 div.list table tr:hover {
