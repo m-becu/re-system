@@ -78,6 +78,7 @@ if (isset($_GET["action"])) {
                     <option value="funk">Funk</option>
                     <option value="electro">Electro</option>
                     <option value="disco">Disco</option>
+                    <option value="rap">Rap</option>
                 </select>
                 <input type="submit" value="Envoyer">
             </form>
